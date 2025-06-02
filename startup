@@ -1,3 +1,10 @@
+#!/usr/bin/env bash
+# Ultroid - UserBot
+# Copyright (C) 2021-2025 TeamUltroid
+#
+# This file is a part of < https://github.com/TeamUltroid/Ultroid/ >
+# Please read the GNU Affero General Public License in <https://www.github.com/TeamUltroid/Ultroid/blob/main/LICENSE/>.
+
 echo "
             ┏┳┓╋┏┓╋╋╋╋┏┓┏┓
             ┃┃┣┓┃┗┳┳┳━╋╋┛┃
@@ -5,12 +12,25 @@ echo "
             ┗━┻━┻━┻┛┗━┻┻━┛
 
       Visit @TheUltroid for updates!!
+
 "
 
-# Start Flask app in the background
-echo "Starting Flask Uptime Bot..."
+# Load environment variables
+if [ -f .env ]; then
+    set -o allexport
+    source .env
+    set +o allexport
+fi
+
+# Start Flask uptime bot in background
+echo "Starting Flask Uptime Server (app.py)..."
 python3 app.py &
 
-# Start Ultroid bot
-echo "Starting Ultroid Bot..."
-python3 -m Ultroid
+# Start Ultroid
+if [ "$SESSION1" ]; then
+    echo "Starting multi_client.py..."
+    python3 multi_client.py
+else
+    echo "Starting pyUltroid..."
+    python3 -m pyUltroid
+fi
