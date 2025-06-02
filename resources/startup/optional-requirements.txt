@@ -1,7 +1,7 @@
 # Required only for Local Deploys
 # ------------------------------------------------------ #
 
-akipy
+git+https://github.com/advnpzn/akipy.git
 apscheduler
 aiohttp
 bs4
