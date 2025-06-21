@@ -414,12 +414,15 @@ async def deepseek_ai(event):
 
         msg = await event.eor("🤔 Thinking...")
 
-        model = "deepseek/deepseek-r1-0528:free"
-        api_url = f"https://deep-seek-tawny.vercel.app/ask/{model}"
+        # ✅ Always use the working model path your API expects
+        hardcoded_model = "deepseek/deepseek-r1-0528:free"
+        model_name = "deepseek-r1-0528:free"  # for display only
+
+        api_url = f"https://deep-seek-tawny.vercel.app/ask/{hardcoded_model}"
 
         formatted_response = (
             "🤖 **DeepSeek AI**\n"
-            f"**Model:** `{model}`\n"
+            f"**Model:** `{model_name}`\n"
             "➖➖➖➖➖➖➖➖➖➖\n\n"
             f"**🔍 Prompt:**\n{prompt}\n\n"
             f"**💡 Response:**\n"
@@ -438,6 +441,7 @@ async def deepseek_ai(event):
             await msg.edit(formatted_response + result)
         except Exception:
             await msg.edit("✅ Response received, but too long to display.")
+
     except Exception as e:
         try:
             await event.eor(f"❌ Unexpected error:\n`{str(e)}`")
