@@ -404,18 +404,17 @@ async def openai_ai(event):
 
 @ultroid_cmd(pattern="deepseek( (.*)|$)")
 async def deepseek_ai(event):
-    """Use DeepSeek AI"""
+    """Use DeepSeek AI via custom API, with fallback"""
+    import aiohttp
+
     prompt = event.pattern_match.group(1).strip()
     if not prompt:
         return await event.eor("❌ Please provide a prompt!")
 
     api_key = udB.get_key("DEEPSEEK_API_KEY")
-    if not api_key:
-        return await event.eor("⚠️ Please set DeepSeek API key using `setdb DEEPSEEK_API_KEY your_api_key`")
-
     msg = await event.eor("🤔 Thinking...")
     model = get_model("deepseek")
-    
+
     formatted_response = (
         "🤖 **DeepSeek AI**\n"
         f"**Model:** `{model}`\n"
@@ -423,7 +422,25 @@ async def deepseek_ai(event):
         f"**🔍 Prompt:**\n{prompt}\n\n"
         f"**💡 Response:**\n"
     )
-    
+
+    # Try Custom Hosted API First
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.post(
+                f"https://deep-seek-tawny.vercel.app/ask/{model}",
+                json={"message": prompt},
+                timeout=30
+            ) as resp:
+                if resp.status == 200:
+                    result = await resp.text()
+                    return await msg.edit(formatted_response + result)
+    except Exception:
+        pass  # If any error, fallback below
+
+    # Fallback to original DeepSeek API
+    if not api_key:
+        return await msg.edit("⚠️ Please set DeepSeek API key using `setdb DEEPSEEK_API_KEY your_api_key`")
+
     if event.client.me.bot:
         await msg.edit(formatted_response)
         response = ""
@@ -437,9 +454,7 @@ async def deepseek_ai(event):
         response = ""
         async for chunk in get_ai_response("deepseek", prompt, api_key, stream=True):
             response += chunk
-
         try:
             await msg.edit(formatted_response + response)
         except Exception:
             pass
-
