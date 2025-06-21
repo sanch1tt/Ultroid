@@ -405,33 +405,33 @@ async def openai_ai(event):
 @ultroid_cmd(pattern="deepseek( (.*)|$)")
 async def deepseek_ai(event):
     """DeepSeek AI via Custom API"""
-    prompt = event.pattern_match.group(1).strip()
-    if not prompt:
-        return await event.eor("❌ Please provide a prompt!")
-
-    msg = await event.eor("🤔 Thinking...")
-
-    model = "deepseek/deepseek-r1-0528:free"
-    api_url = f"https://deep-seek-tawny.vercel.app/ask/{model}"
-
-    formatted_response = (
-        "🤖 **DeepSeek AI**\n"
-        f"**Model:** `{model}`\n"
-        "➖➖➖➖➖➖➖➖➖➖\n\n"
-        f"**🔍 Prompt:**\n{prompt}\n\n"
-        f"**💡 Response:**\n"
-    )
+    import aiohttp
 
     try:
+        prompt = event.pattern_match.group(1).strip()
+        if not prompt:
+            return await event.eor("❌ Please provide a prompt!")
+
+        msg = await event.eor("🤔 Thinking...")
+
+        model = "deepseek/deepseek-r1-0528:free"
+        api_url = f"https://deep-seek-tawny.vercel.app/ask/{model}"
+
+        formatted_response = (
+            "🤖 **DeepSeek AI**\n"
+            f"**Model:** `{model}`\n"
+            "➖➖➖➖➖➖➖➖➖➖\n\n"
+            f"**🔍 Prompt:**\n{prompt}\n\n"
+            f"**💡 Response:**\n"
+        )
+
         async with aiohttp.ClientSession() as session:
             async with session.post(api_url, json={"message": prompt}) as resp:
                 if resp.status != 200:
                     return await msg.edit(f"❌ API Error: HTTP {resp.status}")
                 result = await resp.text()
-    except Exception as e:
-        return await msg.edit(f"❌ Failed to connect to API:\n`{str(e)}`")
 
-    try:
-        await msg.edit(formatted_response + result)
-    except Exception:
-        await msg.edit("✅ Response received, but too long to display.")
+        try:
+            await msg.edit(formatted_response + result)
+        except Exception:
+            await msg.edit("✅ Response received, but too long to display.")
