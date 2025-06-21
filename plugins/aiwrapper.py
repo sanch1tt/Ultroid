@@ -416,7 +416,7 @@ async def deepseek_ai(event):
 
         # ✅ Always use the working model path your API expects
         hardcoded_model = "deepseek/deepseek-r1-0528:free"
-        model_name = "deepseek-r1-0528:free"  # for display only
+        model_name = "deepseek-r1-0528"  # for display only
 
         api_url = f"https://deep-seek-tawny.vercel.app/ask/{hardcoded_model}"
 
