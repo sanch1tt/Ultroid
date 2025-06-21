@@ -404,16 +404,15 @@ async def openai_ai(event):
 
 @ultroid_cmd(pattern="deepseek( (.*)|$)")
 async def deepseek_ai(event):
-    """Use DeepSeek AI via custom API, with fallback"""
-    import aiohttp
-
+    """DeepSeek AI via Custom API"""
     prompt = event.pattern_match.group(1).strip()
     if not prompt:
         return await event.eor("❌ Please provide a prompt!")
 
-    api_key = udB.get_key("DEEPSEEK_API_KEY")
     msg = await event.eor("🤔 Thinking...")
-    model = get_model("deepseek")
+
+    model = "deepseek/deepseek-r1-0528:free"
+    api_url = f"https://deep-seek-tawny.vercel.app/ask/{model}"
 
     formatted_response = (
         "🤖 **DeepSeek AI**\n"
@@ -423,38 +422,16 @@ async def deepseek_ai(event):
         f"**💡 Response:**\n"
     )
 
-    # Try Custom Hosted API First
     try:
         async with aiohttp.ClientSession() as session:
-            async with session.post(
-                f"https://deep-seek-tawny.vercel.app/ask/{model}",
-                json={"message": prompt},
-                timeout=30
-            ) as resp:
-                if resp.status == 200:
-                    result = await resp.text()
-                    return await msg.edit(formatted_response + result)
+            async with session.post(api_url, json={"message": prompt}) as resp:
+                if resp.status != 200:
+                    return await msg.edit(f"❌ API Error: HTTP {resp.status}")
+                result = await resp.text()
+    except Exception as e:
+        return await msg.edit(f"❌ Failed to connect to API:\n`{str(e)}`")
+
+    try:
+        await msg.edit(formatted_response + result)
     except Exception:
-        pass  # If any error, fallback below
-
-    # Fallback to original DeepSeek API
-    if not api_key:
-        return await msg.edit("⚠️ Please set DeepSeek API key using `setdb DEEPSEEK_API_KEY your_api_key`")
-
-    if event.client.me.bot:
-        await msg.edit(formatted_response)
-        response = ""
-        async for chunk in get_ai_response("deepseek", prompt, api_key, stream=True):
-            response += chunk
-            try:
-                await msg.edit(formatted_response + response)
-            except Exception:
-                pass
-    else:
-        response = ""
-        async for chunk in get_ai_response("deepseek", prompt, api_key, stream=True):
-            response += chunk
-        try:
-            await msg.edit(formatted_response + response)
-        except Exception:
-            pass
+        await msg.edit("✅ Response received, but too long to display.")
