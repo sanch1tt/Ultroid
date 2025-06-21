@@ -431,7 +431,15 @@ async def deepseek_ai(event):
                     return await msg.edit(f"❌ API Error: HTTP {resp.status}")
                 result = await resp.text()
 
+        if not result.strip():
+            return await msg.edit("❌ Empty response received from API.")
+
         try:
             await msg.edit(formatted_response + result)
         except Exception:
             await msg.edit("✅ Response received, but too long to display.")
+    except Exception as e:
+        try:
+            await event.eor(f"❌ Unexpected error:\n`{str(e)}`")
+        except:
+            pass
