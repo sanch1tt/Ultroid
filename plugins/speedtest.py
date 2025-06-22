@@ -3,7 +3,7 @@ from telethon import events
 from speedtest import Speedtest
 from . import *
 
-@ultroid_cmd(pattern="speedtest$")
+@ultroid_cmd(pattern="speedtest( (.*)|$)")
 async def speed_test(event):
     await event.edit("Running speed test... ⚡")
     try:
