@@ -1,9 +1,16 @@
-# credits: @sanch1tt
+"""
+✘ Commands Available -
+
+• `{i}speedtest`
+    Run a speedtest to check your bot’s internet speed (download, upload, ping).
+
+"""
+
 from telethon import events
 from speedtest import Speedtest
 from . import *
 
-@ultroid_cmd(pattern="speedtest( (.*)|$)")
+@ultroid_cmd(pattern="speedtest")
 async def speed_test(event):
     await event.edit("Running speed test... ⚡")
     try:
@@ -21,4 +28,3 @@ async def speed_test(event):
         )
     except Exception as e:
         await event.edit(f"❌ Failed to test speed: `{e}`")
-      
